@@ -12,7 +12,7 @@ more complicated things that could be hard to remember.
 
 These are my favorites, in order of preference:
 
-=`nocomment`=
+* `nocomment`
     For sysadmin tasks, this is helpful to display only the very few lines
     that configure a service or a program without the comments nor the blank
     lines. Some services or applications ship their own facilities to dump
