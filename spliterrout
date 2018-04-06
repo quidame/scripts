@@ -1,0 +1,2 @@
+#!/bin/bash
+[ -t 1 -a ! -t 2 ] && tee >(cat >&2 ) || cat >&2
