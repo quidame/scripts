@@ -1,0 +1,12 @@
+#!/bin/sh
+# Name: nocomment
+# Description:  Output files without their inline comments nor their blank
+#  lines. By default, inline comments start with '#'. To apply this script
+#  to files with other inline comment markers,  export the 'c' variable to
+#  the environment of this script. It may also accept more than one marker
+#  separated by a pipe character (|), all rounded by single or double quotes.
+# Examples:
+#  nocomment .bashrc
+#  c='"' nocomment /etc/vim/vimrc*
+#  c="#|//" nocomment /etc/bind/named.conf
+exec grep -Ehv "^\s*(${c:-#}|$)" "${@}"
