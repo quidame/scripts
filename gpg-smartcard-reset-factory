@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# /!\ USE WITH CARE /!\
+# I don't know how many write cycles are allowed on this device.
+
+reset_openpgp_smartcard_to_its_factory_defaults() {
+	gpg-connect-agent <<-EOF
+	/echo *** Card will be reset to its factory defaults ***
+	/hex
+	scd serialno
+	scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+	scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+	scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+	scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+	scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+	scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+	scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+	scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+	scd apdu 00 e6 00 00
+	scd apdu 00 44 00 00
+	scd restart
+	/echo *** Card has been reset to its factory defaults ***
+	bye
+	EOF
+}
+
+LANG=C
+
+if gpg --card-status >/dev/null; then
+	reset_openpgp_smartcard_to_its_factory_defaults
+fi
