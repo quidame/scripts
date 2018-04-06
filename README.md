@@ -19,9 +19,11 @@ These are my favorites, in order of preference:
     their configuration (and check it, by the way): `apt`, `postfix`, `bind9`,
     and so on. But some other don't. Examples:
 
-    `nocomment /etc/ssh/sshd_config`
-    `nocomment /etc/dhcp/dhclient.conf`
-    `nocomment -r /etc/dnsmasq.d`
+    ```
+    nocomment /etc/ssh/sshd_config
+    nocomment /etc/dhcp/dhclient.conf
+    nocomment -r /etc/dnsmasq.d
+    ```
 
 * `gpg-smartcard-reset-factory`  
     If you plan to write somethihg to automate creation and storage of a GPG
