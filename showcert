@@ -1,4 +1,5 @@
 #!/bin/sh -eu
 HOST=${1%:*}
 PORT=${1#*:}
-echo QUIT | openssl s_client -connect ${HOST}:${PORT:-443} | openssl x509 -noout -text
+[ "${HOST}" != "${PORT}" ] || PORT=443
+echo QUIT | openssl s_client -connect ${HOST}:${PORT:-443} | openssl x509 -noout ${2:--text}
