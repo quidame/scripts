@@ -1,0 +1,102 @@
+#!/bin/sh
+set -e
+
+# For further info on the main commands used here consult the man pages for
+# "wmctrl" and/or "terminal" (this may be different if you wish to use another
+# terminal instead of the Gnome or XFCE terminal)
+
+# No reason to run initially as root...
+if [ $(id -u) -eq 0 ]; then
+    exit 1
+fi
+if [ -z "${DISPLAY}" ]; then
+    exit 1
+fi
+
+# Define required options with reasonable default values to make it working
+# standalone, i.e. even if config file is missing. A such config file should
+# only contain the 3 following variables. Other options can be added as
+# arguments of this script: they will be passed to the terminal command.
+#
+# The most important of all, because we will rely on it to identify the
+# window. Default is to set the title of the window as the basename of this
+# script:
+WT_TITLE="${0##*/}"
+#
+# How to open the terminal window. Possible values are 'maximize' (default),
+# 'fullscreen', or 'geometry=LxC+XxY' where LxC is the size of the terminal
+# (L(ines)xC(olumns) of characters, e.g. 80x24) and XxY the position of the
+# window on the screen (in pixels).
+WT_SCREEN_MODE="maximize"
+#
+# Make the terminal window is displayed on all virtual desktops or only on
+# the current one (where it has been opened from). This is a boolean (may be
+# 0, false, no, 1, true, yes; case insensitive), and will be used to pass the
+# sticky option to wmctrl. Default is yes.
+WT_STICKY="yes"
+
+
+# System wide and user configuration files, that will override previously
+# defined variables.
+SYSCFG="/etc/xdg/wallterm/wallterm.conf"
+USRCFG="${HOME}/.config/wallterm/wallterm.conf"
+
+if [ -f "${SYSCFG}" ]; then . ${SYSCFG}; fi
+if [ -f "${USRCFG}" ]; then . ${USRCFG}; fi
+
+# So at this step, the window title is set and we can check if one is already
+# opened, then switch to the desktop containing it and give it the focus.
+if wmctrl -l | grep -owq "${WT_TITLE}$"; then
+    wmctrl -a ${WT_TITLE}
+    exit 0
+fi
+
+# It's time to parse variables and set terminal options that seem reasonable
+# for our purpose. Following options are compatible with gnome-terminal and
+# xfce4-terminal:
+TERMOPTS="--title=${WT_TITLE} --hide-borders --hide-toolbar --hide-menubar"
+
+case "${WT_SCREEN_MODE}" in
+    fullscreen|geometry=*|maximize)
+        TERMOPTS="${TERMOPTS} --${WT_SCREEN_MODE}"
+        ;;
+esac
+
+# wmctrl(1) options for setting the window as a wallpaper.
+WMOPT1="-b add,skip_taskbar,skip_pager"
+WMOPT2="-b add,below"
+if echo "${WT_STICKY}" | grep -qEi '^(1|true|yes)$'; then
+    WMOPT2="${WMOPT2},sticky"
+fi
+
+for term in xfce4-terminal gnome-terminal; do
+    if which ${term} >/dev/null; then
+        TERMINAL="${term}"
+        break
+    fi
+done
+
+# Run terminal now and pass it all commandline options without processing.
+# This is usefull to run a terminal application (as htop) or multiplexer
+# (screen or tmux or open tabs with --tab) in background.
+${TERMINAL} ${TERMOPTS} "$@" &
+
+# Set window behaviour with wmctrl, but we need to do it in a loop (around
+# 25 iterations on my laptop).
+while true; do
+    if wmctrl -l | grep -owq "${WT_TITLE}$"; then
+        #ID="$(wmctrl -l | sed -nr "/${WT_TITLE}$/s,^([^ ]+).*,\1,p")"
+        #wmctrl -i -r ${ID} ${WMOPT1}
+        #wmctrl -i -r ${ID} ${WMOPT2}
+        wmctrl -r ${WT_TITLE} ${WMOPT1}
+        wmctrl -r ${WT_TITLE} ${WMOPT2}
+        if ! echo "${WT_STICKY}" | grep -qEi '^(1|true|yes)$'; then
+            if [ -n "${WT_WORKSPACE}" ]; then
+                wmctrl -r ${WT_TITLE} -t ${WT_WORKSPACE}
+            fi
+        fi
+        break
+    fi
+done
+
+# vim: et sts=4 sw=4 ts=4
