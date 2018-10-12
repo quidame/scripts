@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # ECHOIP - listen on TCP port given as argument and answer client's IP to client
-# requests. It listens on all IPv6 interfaces and IPv4 requests and treaten in
+# requests. It listens on all IPv6 interfaces and IPv4 requests are treaten in
 # IPv6 dual stack. Usage:
 #   echoip.py PORT
 
