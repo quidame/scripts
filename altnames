@@ -1,0 +1,10 @@
+#!/bin/sh -eu
+
+HOST=${1%:*}
+PORT=${1#*:}
+[ "${HOST}" != "${PORT}" ] || PORT=443
+
+echo QUIT |
+openssl s_client -connect ${HOST}:${PORT:-443} 2>/dev/null |
+openssl x509 -noout -text |
+sed -nre '/^\s+DNS:/s/ +DNS://; s/, DNS:/\n/gp'
