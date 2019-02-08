@@ -1,0 +1,37 @@
+#!/bin/sh
+
+if [ $# -eq 0 ]; then
+    cat /proc/cmdline
+    exit $?
+fi
+
+print_cmdline() {
+    for pid; do
+        if [ -r "/proc/${pid}/cmdline" -a -n "$(cat "/proc/${pid}/cmdline")" ]; then
+            echo "[pid ${pid}]"
+            sed -e 's|[^[:print:]]\+| |g' /proc/${pid}/cmdline
+            echo
+        elif [ -r "/proc/${pid}/cmdline" ]; then
+            echo "[pid ${pid}] : empty." >&2
+        else
+            echo "[pid ${pid}] : Permission denied." >&2
+        fi
+    done
+}
+
+for x; do
+    if echo "${x}" | grep -q '^[1-9][0-9]*$'; then
+        if [ -d "/proc/${x}" ]; then
+            print_cmdline ${x}
+        else
+            echo "${0##*/}: process ${x} does not exist." >&2
+        fi
+
+    elif pidof "${x}" >/dev/null; then
+        print_cmdline $(pidof ${x})
+    else
+        echo "${0##*/}: process ${x} does not exist." >&2
+    fi
+done
+
+# vim: et sts=4 sw=4 ts=4
