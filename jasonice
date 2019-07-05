@@ -1,0 +1,6 @@
+#!/bin/sh -e
+python -m json.tool |
+if [ -t 1 ]
+then view - +"set ft=json"
+else cat
+fi
