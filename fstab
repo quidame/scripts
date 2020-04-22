@@ -1,0 +1,11 @@
+#!/bin/sh
+# vim: ft=sh et sts=4 sw=4 ts=4
+
+grep '^#' /etc/fstab
+echo
+findmnt \
+    --fstab \
+    --noheadings \
+    --canonicalize \
+    --output source,target,fstype,options,freq,passno |
+    sed -r 's,([^   ])/(\s),\1 \2,'
